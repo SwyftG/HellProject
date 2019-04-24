@@ -12,3 +12,13 @@ class HellprojectItem(scrapy.Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
     pass
+
+class TtmjTvPlayItem(scrapy.Item):
+    tv_play_name = scrapy.Field()
+    tv_play_rank = scrapy.Field()
+    tv_play_category = scrapy.Field()
+    tv_play_state = scrapy.Field()
+    tv_play_update_day = scrapy.Field()
+    tv_play_return_date = scrapy.Field()
+    tv_play_counting_data = scrapy.Field()
+    tv_play_url = scrapy.Field()
