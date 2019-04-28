@@ -4,6 +4,7 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.selector import Selector
 from ..items import *
+import re
 from urllib.parse import quote
 
 
@@ -16,26 +17,50 @@ class PlayrankingSpider(CrawlSpider):
 
     rules = (
         # Rule(LinkExtractor(allow=r'Items/'), callback='parse_item', follow=True),
-        Rule(LinkExtractor(restrict_xpaths='//ul[@class="pagination"]//a[@class="next"]'), callback='parse_item', follow=True),
+        Rule(LinkExtractor(restrict_xpaths='//ul[@class="pagination"]//a[@class="next"]'), callback='parse_item'),
     )
 
     def parse_start_url(self, response):
+        self.parse_top_three(response)
+        self.parse_normal_item(response)
         print(response.url)
-        print(response.url)
-        print(response.url)
-
 
     def parse_item(self, response):
-        # i = {}
-        #i['domain_id'] = response.xpath('//input[@id="sid"]/@value').extract()
-        #i['name'] = response.xpath('//div[@id="name"]').extract()
-        #i['description'] = response.xpath('//div[@id="description"]').extract()
-        # return i
-        name_list = response.xpath('//td[@align="left"]//a/text()').extract()
-        # tr_list = response.xpath('//tr[contains(@class, "Scontent")]')   111
+        self.parse_normal_item(response)
+        print(response.url)
+
+
+    def parse_top_three(self,response):
+        top_3_div_list = response.xpath('//div[@class="ranktop3"]').extract()
+        for div_item in top_3_div_list:
+            tv_item = TtmjTvPlayItem()
+            selector = Selector(text=div_item)
+            tv_item['tv_play_rank'] = selector.xpath('//div[@class="ranknum"]/text()').extract_first()
+            tv_item['tv_play_name'] = selector.xpath('//div[@class="mjtit"]//a/text()').extract_first()
+            play_info = selector.xpath('//div[@class="mjinfo"]').extract()
+            play_info_list = self.remove_html_tag(play_info)
+            tv_info_list = play_info_list[0].split('/')
+            for index, info_item in enumerate(tv_info_list):
+                if index == 0:
+                    tv_item['tv_play_category'] = info_item
+                elif index == 1:
+                    tv_item['tv_play_state'] = info_item
+                elif index == 2:
+                    tv_item['tv_play_state'] = info_item
+            tv_item['tv_play_return_date'] = play_info_list[1]
+            tv_item['tv_play_url'] = self.root_url + selector.xpath('//div[@class="mjtit"]//a/@href').extract_first()[1:]
+            print(tv_item)
+
+    def remove_html_tag(self, play_info):
+        result = list()
+        html_tag_pattern = re.compile('<[^>]+>')
+        for item in play_info:
+            result.append(html_tag_pattern.subn('', item)[0])
+        return result
+
+    def parse_normal_item(self, response):
         tr_list = response.xpath('//tr[contains(@class, "Scontent")]').extract()
         for content in tr_list:
-            # name = content.xpath('//td[@align="left"]//a/text()').extract() 111
             tv_item = TtmjTvPlayItem()
             selector = Selector(text=content)
             td_list = selector.xpath('//td/text()').extract()
@@ -59,9 +84,3 @@ class PlayrankingSpider(CrawlSpider):
             tv_item['tv_play_url'] = self.root_url + selector.xpath('//td[@align="left"]//a/@href').extract_first()[1:]
 
             print(tv_item)
-
-            # print(name)
-            # print(rank)
-        # print(response.url)
-        # print(name_list)
-        # print(tr_list)
