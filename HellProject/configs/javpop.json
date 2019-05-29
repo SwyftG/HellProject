@@ -1,0 +1,71 @@
+{
+  "spider": "javpop",
+  "settings": {
+    "USER_AGENT": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36"
+  },
+  "start_urls": {
+    "type": "datetime",
+    "name": "javpop_url",
+    "value": ["http://javpop.com/category/censored"],
+    "date":"20190529"
+  },
+  "allowed_domains": [
+    "javpop.com"
+  ],
+  "rules": "javpop",
+  "item": {
+    "class": "JavpopItem",
+    "loader": "JavpopLoader",
+    "attrs": {
+      "video_url": [
+        {
+          "method": "attr",
+          "args": [
+            "url"
+          ]
+        }
+      ],
+      "video_title": [
+        {
+          "method": "xpath",
+          "args": [
+            "//div[@class='box-b']/h1/text()"
+          ]
+        }
+      ],
+      "video_num": [
+        {
+          "method": "xpath",
+          "args": [
+            "//div[@class='box-b']/h1/text()"
+          ],
+          "re": "\\[.*\\]"
+        }
+      ],
+      "video_img_poster": [
+        {
+          "method": "xpath",
+          "args": [
+            "//div[@class='box-b']/div[@class='entry']/p[@class='poster']/img/@src"
+          ]
+        }
+      ],
+      "video_img_screenshot": [
+        {
+          "method": "xpath",
+          "args": [
+            "//div[@class='box-b']/div[@class='entry']/p[@class='screenshot']/img/@src"
+          ]
+        }
+      ],
+      "video_tags": [
+        {
+          "method": "xpath",
+          "args": [
+            "//div[@class='box-b']/div[@class='entry']/div[@class='post-meta']/div/p/a/text()"
+          ]
+        }
+      ]
+    }
+  }
+}
